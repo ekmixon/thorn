@@ -47,7 +47,7 @@ class test_buffer_events:
 
         with thorn.buffer_events(app=app) as buffer:
             _buffer = buffer  # keep alive
-            app.enable_buffer.assert_called_once_with(owner=buffer)
+            app.enable_buffer.assert_called_once_with(owner=_buffer)
         app.flush_buffer.assert_called_once_with(owner=_buffer)
         app.disable_buffer.assert_called_once_with(owner=_buffer)
 

@@ -56,10 +56,7 @@ def ensure_protocol(*allowed):
     Example:
         >>> ensure_protocol('https', 'http://')
     """
-    allowed = tuple(
-        x if '://' in x else x + '://'
-        for x in allowed
-    )
+    allowed = tuple(x if '://' in x else f'{x}://' for x in allowed)
 
     def validate_protocol(recipient_url):
         # type: (str) -> None
@@ -67,6 +64,7 @@ def ensure_protocol(*allowed):
             raise SecurityError(
                 'Protocol of recipient URL not allowed ({0} only)'.format(
                     allowed))
+
     validate_protocol._args = allowed
     validate_protocol._validator = 'ensure_protocol'
     return validate_protocol

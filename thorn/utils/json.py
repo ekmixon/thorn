@@ -56,7 +56,7 @@ class JsonEncoder(get_best_json('JSONEncoder')[0]):
                 o = datetime(o.year, o.month, o.day, 0, 0, 0, 0)
             r = o.isoformat()
             if r.endswith("+00:00"):
-                r = r[:-6] + "Z"
+                r = f"{r[:-6]}Z"
             return r
         elif isinstance(o, times):
             return o.isoformat()

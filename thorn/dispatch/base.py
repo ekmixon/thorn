@@ -49,12 +49,11 @@ class Dispatcher(object):
         return owner is None or owner is obj
 
     def disable_buffer(self, owner=None):
-        if self._buffer:
-            if not owner or self._is_buffer_owner(owner):
-                if self.pending_outbound:
-                    raise BufferNotEmpty(
-                        'please flush_buffer(), before disabling it.')
-                self._buffer = False
+        if self._buffer and (not owner or self._is_buffer_owner(owner)):
+            if self.pending_outbound:
+                raise BufferNotEmpty(
+                    'please flush_buffer(), before disabling it.')
+            self._buffer = False
 
     def flush_buffer(self, owner=None):
         if not owner or self._is_buffer_owner(owner):
@@ -130,8 +129,11 @@ class Dispatcher(object):
         ])
 
     def _maybe_subscriber(self, d, **kwargs):
-        return (self.app.Subscriber.from_dict(d, **kwargs)
-                if not isinstance(d, AbstractSubscriber) else d)
+        return (
+            d
+            if isinstance(d, AbstractSubscriber)
+            else self.app.Subscriber.from_dict(d, **kwargs)
+        )
 
     def _traverse_subscribers(self, it, name, **context):
         return (self._maybe_subscriber(d, event=name)

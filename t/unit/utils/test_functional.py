@@ -335,4 +335,4 @@ class test_traverse_subscribers:
         symbol_by_name.assert_called_once_with('some.where.symbol')
 
     def test_none_items(self):
-        assert list(traverse_subscribers([None, [None], None])) == []
+        assert not list(traverse_subscribers([None, [None], None]))

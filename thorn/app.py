@@ -204,7 +204,7 @@ class Thorn(object):
                 implementation will not be provided.
         """
         Class = symbol_by_name(Class)
-        reverse = reverse if reverse else Class.__name__
+        reverse = reverse or Class.__name__
 
         def __reduce__(self):
             return _unpickle_appattr, (reverse, self.__reduce_keys__())

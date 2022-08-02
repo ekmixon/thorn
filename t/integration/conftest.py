@@ -63,46 +63,47 @@ def _celery_app():
 
 @pytest.fixture(scope='session')
 def celery_worker(_celery_app):
-    if not NO_WORKER:
-        on_started = threading.Event()
+    if NO_WORKER:
+        return
+    on_started = threading.Event()
 
-        def on_worker_ready(consumer):
-            on_started.set()
+    def on_worker_ready(consumer):
+        on_started.set()
 
-        _celery_app.set_current()
-        _celery_app.set_default()
-        _celery_app.finalize()
-        _celery_app.log.setup()
+    _celery_app.set_current()
+    _celery_app.set_default()
+    _celery_app.finalize()
+    _celery_app.log.setup()
 
-        # Make sure we can connect to the broker
-        with _celery_app.connection() as conn:
-            conn.default_channel.queue_declare
+    # Make sure we can connect to the broker
+    with _celery_app.connection() as conn:
+        conn.default_channel.queue_declare
 
-        if celery.VERSION >= (4,):
-            pool_args = {'pool': 'solo'}
-        else:
-            pool_args = {'pool_cls': 'solo'}
+    if celery.VERSION >= (4,):
+        pool_args = {'pool': 'solo'}
+    else:
+        pool_args = {'pool_cls': 'solo'}
 
-        worker = _celery_app.WorkController(
-            concurrency=1,
-            loglevel=WORKER_LOGLEVEL,
-            logfile=None,
-            ready_callback=on_worker_ready,
-            **pool_args)
-        t = threading.Thread(target=worker.start)
-        t.start()
+    worker = _celery_app.WorkController(
+        concurrency=1,
+        loglevel=WORKER_LOGLEVEL,
+        logfile=None,
+        ready_callback=on_worker_ready,
+        **pool_args)
+    t = threading.Thread(target=worker.start)
+    t.start()
 
-        assert any(t.startswith('thorn.') for t in _celery_app.tasks)
-        assert 'cyanide.tasks.add' in _celery_app.tasks
+    assert any(t.startswith('thorn.') for t in _celery_app.tasks)
+    assert 'cyanide.tasks.add' in _celery_app.tasks
 
-        on_started.wait()
+    on_started.wait()
 
-        with allow_join_result():
-            assert add.delay(2, 2).get(timeout=3) == 4
-        _set_task_join_will_block(False)
-        yield worker
-        worker.stop()
-        t.join()
+    with allow_join_result():
+        assert add.delay(2, 2).get(timeout=3) == 4
+    _set_task_join_will_block(False)
+    yield worker
+    worker.stop()
+    t.join()
 
 
 def new_ref():

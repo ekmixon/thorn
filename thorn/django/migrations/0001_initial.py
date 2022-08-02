@@ -9,6 +9,8 @@ import thorn.generic.models
 import uuid
 
 
+
+
 class Migration(migrations.Migration):
 
     initial = True
@@ -21,36 +23,82 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Subscriber',
             fields=[
-                ('id', models.AutoField(
-                    auto_created=True, primary_key=True,
-                    serialize=False, verbose_name='ID')),
-                ('uuid', models.UUIDField(
-                    default=uuid.uuid4, editable=False,
-                    help_text='Unique identifier for this subscriber.',
-                    unique=True, verbose_name='UUID')),
-                ('event', models.CharField(
-                    db_index=True, help_text='Name of event to connect with',
-                    max_length=190, verbose_name='event')),
-                ('url', models.URLField(
-                    db_index=True, help_text='Callback URL',
-                    max_length=190, verbose_name='URL')),
-                ('content_type', models.CharField(
-                    choices=[('application/json', 'application/json'),
-                             ('application/x-www-form-urlencoded',
-                              'application/x-www-form-urlencoded')],
-                    default='application/json',
-                    help_text='''
+                (
+                    'id',
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
+                (
+                    'uuid',
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        help_text='Unique identifier for this subscriber.',
+                        unique=True,
+                        verbose_name='UUID',
+                    ),
+                ),
+                (
+                    'event',
+                    models.CharField(
+                        db_index=True,
+                        help_text='Name of event to connect with',
+                        max_length=190,
+                        verbose_name='event',
+                    ),
+                ),
+                (
+                    'url',
+                    models.URLField(
+                        db_index=True,
+                        help_text='Callback URL',
+                        max_length=190,
+                        verbose_name='URL',
+                    ),
+                ),
+                (
+                    'content_type',
+                    models.CharField(
+                        choices=[
+                            ('application/json', 'application/json'),
+                            (
+                                'application/x-www-form-urlencoded',
+                                'application/x-www-form-urlencoded',
+                            ),
+                        ],
+                        default='application/json',
+                        help_text='''
                         Desired content type for requests to this callback.
                     '''.strip(),
-                    max_length=190, verbose_name='content type')),
-                ('created_at', models.DateTimeField(
-                    auto_now_add=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(
-                    auto_now=True, verbose_name='updated_at')),
-                ('user', models.ForeignKey(
-                    null=True, on_delete=django.db.models.deletion.CASCADE,
-                    related_name='webhooks_subscriber',
-                    to=settings.AUTH_USER_MODEL)),
+                        max_length=190,
+                        verbose_name='content type',
+                    ),
+                ),
+                (
+                    'created_at',
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name='created at'
+                    ),
+                ),
+                (
+                    'updated_at',
+                    models.DateTimeField(
+                        auto_now=True, verbose_name='updated_at'
+                    ),
+                ),
+                (
+                    'user',
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='webhooks_subscriber',
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
                 'ordering': ['url', '-created_at'],
@@ -61,7 +109,6 @@ class Migration(migrations.Migration):
             bases=(models.Model, thorn.generic.models.SubscriberModelMixin),
         ),
         migrations.AlterUniqueTogether(
-            name='subscriber',
-            unique_together=set([('url', 'event')]),
+            name='subscriber', unique_together={('url', 'event')}
         ),
     ]
